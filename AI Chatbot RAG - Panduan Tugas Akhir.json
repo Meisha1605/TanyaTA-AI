@@ -1,0 +1,307 @@
+{
+  "name": "AI Chatbot RAG - Panduan Tugas Akhir",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "1dbef1b7-422e-4b5c-946d-5093772e6a7b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1AYwrqYoVhxPDet9pzEdL1zK3zi3PQbCp",
+          "mode": "list",
+          "cachedResultName": "Panduan Penulisan Ilmiah Tugas Akhir Skripsi.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1AYwrqYoVhxPDet9pzEdL1zK3zi3PQbCp/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        192,
+        0
+      ],
+      "id": "0d7f9ab1-0f6f-42ee-81cd-7cf9d0f0137f",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "m7CnIxbTJnmvTNa8",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "b187caac-8955-4f21-b8cd-1a441eb2cd2e",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "DtVUS15GJ1gRdjN8",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        416,
+        208
+      ],
+      "id": "a8fa5f15-fc02-4fe7-a2f1-7ddbe474b57d",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QejIxXdouCP5jgRy",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        576,
+        160
+      ],
+      "id": "48a74316-7c7c-4eaf-a5e9-eb9951c2d5ed",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        688
+      ],
+      "id": "9efbad90-94c6-49d0-a6e4-eaafbc6c8458",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QejIxXdouCP5jgRy",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "PENTING: Saat memanggil tool pencarian_skripsi, kamu WAJIB mengirimkan argumen dalam bentuk objek JSON dengan kunci \"query\", contoh: {\"query\": \"kata kunci pencarian\"}. DILARANG mengirimkan teks biasa (string) secara langsung.\n\nATURAN KHUSUS INFORMASI TIDAK DITEMUKAN:\n\nJika informasi yang ditanyakan tidak ditemukan secara jelas dalam hasil dari tool pencarian_skripsi, JANGAN memberikan informasi berdasarkan pengetahuan umum, asumsi, perkiraan, atau sumber lain.\n\nJangan menggunakan kata-kata seperti:\n- \"Umumnya...\"\n- \"Biasanya...\"\n- \"Kemungkinan...\"\n- \"Seharusnya...\"\n- \"Biasanya diatur dalam...\"\n- atau informasi tambahan lain yang tidak terdapat dalam dokumen.\n\nJika informasi tidak ditemukan, cukup jawab:\n\"Maaf, informasi tersebut belum ditemukan dalam Panduan Penulisan Ilmiah Tugas Akhir Skripsi yang tersedia.\"\n\nJangan memberikan alternatif jawaban atau mengarahkan ke sumber lain kecuali informasi tersebut memang disebutkan dalam dokumen."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        64,
+        464
+      ],
+      "id": "70737cd7-980b-4cc7-ac5d-df970ad09163",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.4,
+      "position": [
+        160,
+        672
+      ],
+      "id": "de1ea8d8-ff7e-4ec8-a484-e6e7e73c0ac4",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "CQV0F508wC7YFTcI",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nMy name is Meisha. How can I assist you today?",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -176,
+        464
+      ],
+      "id": "05e8ea1a-a831-4ce7-b4b5-2eb303f7b5b1",
+      "name": "When chat message received",
+      "webhookId": "895bd274-03f7-4db0-a30b-9ce867175f44"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Gunakan untuk mencari dokumen dan aturan penulisan skripsi.",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        416,
+        576
+      ],
+      "id": "6da70bf4-a18b-46dd-bf2e-d600f3022601",
+      "name": "pencarian_skripsi",
+      "credentials": {
+        "supabaseApi": {
+          "id": "DtVUS15GJ1gRdjN8",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "pencarian_skripsi",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pencarian_skripsi": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4e3c7d3e-1d2d-4408-93a4-8215bff67d15",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dc96f10ae7dc95d3c138575ba243a0a167923dbcb524841d451aadf9135d5fb3"
+  },
+  "nodeGroups": [],
+  "id": "gjfJTA4OX0BR4GsN",
+  "tags": []
+}
